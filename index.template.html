@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GitHub 项目热度</title>
+<script>/*__DASHBOARD_DATA__*/</script>
+<script>/*__DASHBOARD_HISTORY__*/</script>
+<style>
+  :root{
+    --bg:#0e0e10;
+    --panel:#141416;
+    --line:#262629;
+    --text:#E9E6DF;
+    --muted:#8E8B84;
+    --faint:#5A5852;
+    --accent:#C2A878;       /* 一抹温度：暖沙金 */
+    --bar:#3a3a3c;          /* 中性灰条 */
+  }
+  *{box-sizing:border-box;}
+  html{-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;}
+  body{margin:0;background:var(--bg);color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"PingFang SC","Microsoft YaHei",sans-serif;
+    font-size:14px;line-height:1.5;}
+  .wrap{max-width:1080px;margin:0 auto;padding:40px 28px 64px;}
+
+  header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px;
+    border-bottom:1px solid var(--line);padding-bottom:18px;}
+  h1{font-size:20px;margin:0;font-weight:600;letter-spacing:.01em;}
+  .eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.16em;color:var(--accent);margin-bottom:6px;}
+  .sub{color:var(--muted);font-size:12px;}
+  .gen{color:var(--faint);font-size:12px;font-variant-numeric:tabular-nums;}
+
+  .note{margin:18px 0 0;font-size:12px;color:var(--muted);line-height:1.6;}
+  .note code{background:var(--panel);border:1px solid var(--line);padding:1px 6px;border-radius:3px;color:var(--text);font-size:11px;}
+
+  #alertSlot{margin:18px 0 0;}
+
+  /* KPI — 编辑式数据栏，去卡片重边框 */
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);margin:30px 0 6px;
+    border-top:1px solid var(--line);border-bottom:1px solid var(--line);}
+  .kpi{padding:18px 20px 20px;}
+  .kpi + .kpi{border-left:1px solid var(--line);}
+  .kpi .label{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:12px;}
+  .kpi .num{font-size:30px;font-weight:600;letter-spacing:-.01em;line-height:1;font-variant-numeric:tabular-nums;}
+  .kpi .sub2{font-size:12px;color:var(--faint);margin-top:9px;}
+
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:30px 0;}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:20px 22px;}
+  .card h3{margin:0 0 18px;font-size:13px;font-weight:600;letter-spacing:.02em;
+    display:flex;align-items:center;gap:9px;color:var(--text);}
+  .card h3::before{content:'';width:3px;height:13px;background:var(--accent);border-radius:1px;}
+
+  /* bar chart */
+  .bar-chart{padding:2px 0;}
+  .bar-row{display:flex;align-items:center;gap:12px;margin-bottom:11px;}
+  .bar-label{width:128px;min-width:128px;font-size:12px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:right;flex-shrink:0;}
+  .bar-track{flex:1;height:22px;background:rgba(255,255,255,0.05);border-radius:3px;position:relative;overflow:hidden;}
+  .bar-fill{height:100%;border-radius:3px;display:flex;align-items:center;padding-left:9px;
+    font-size:11px;color:var(--bg);font-weight:600;min-width:fit-content;font-variant-numeric:tabular-nums;}
+  .bar-val{width:54px;min-width:54px;font-size:12px;color:var(--muted);text-align:right;font-variant-numeric:tabular-nums;}
+
+  /* grouped bar */
+  .group-bar{display:flex;align-items:center;gap:12px;margin-bottom:11px;}
+  .group-label{width:118px;min-width:118px;font-size:12px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:right;flex-shrink:0;}
+  .group-tracks{flex:1;display:flex;gap:6px;height:22px;}
+  .g-track{flex:1;background:rgba(255,255,255,0.04);border-radius:3px;position:relative;overflow:hidden;display:flex;align-items:flex-end;}
+  .g-fill{height:100%;border-radius:3px;min-width:2px;}
+  .g-val{width:34px;min-width:34px;font-size:11px;color:var(--muted);text-align:right;font-variant-numeric:tabular-nums;}
+
+  .legend{display:flex;gap:18px;margin-bottom:12px;font-size:12px;color:var(--muted);}
+  .legend span{display:flex;align-items:center;gap:6px;}
+  .dot{width:9px;height:9px;border-radius:2px;display:inline-block;}
+
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  th,td{text-align:left;padding:11px 12px;border-bottom:1px solid var(--line);}
+  th{color:var(--muted);font-weight:500;font-size:11px;text-transform:uppercase;letter-spacing:.08em;}
+  td a{color:var(--text);text-decoration:none;border-bottom:1px solid var(--line);}
+  td a:hover{color:var(--accent);border-color:var(--accent);}
+  .badge{display:inline-block;font-size:11px;padding:1px 8px;border-radius:3px;border:1px solid var(--line);color:var(--muted);}
+  .badge.priv{color:var(--accent);border-color:rgba(194,168,120,0.4);}
+  .num-cell{font-variant-numeric:tabular-nums;color:var(--text);}
+  .rank{color:var(--faint);font-size:12px;margin-right:8px;font-variant-numeric:tabular-nums;}
+
+  .alert{background:#1c1311;border:1px solid #4a2e29;color:#d9a89f;padding:13px 16px;border-radius:5px;font-size:13px;}
+  footer{margin-top:36px;color:var(--faint);font-size:11px;letter-spacing:.04em;text-align:center;
+    border-top:1px solid var(--line);padding-top:20px;}
+
+  @media(max-width:760px){
+    .kpis{grid-template-columns:repeat(2,1fr);}
+    .kpis .kpi:nth-child(3){border-left:none;}
+    .grid2{grid-template-columns:1fr;}
+    .bar-label,.group-label{width:84px;min-width:84px;font-size:11px;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <div class="eyebrow">GitHub · Activity</div>
+      <h1>项目热度</h1>
+    </div>
+    <div class="gen" id="gen"></div>
+  </header>
+
+  <div class="note">
+    指标窗口来自 GitHub Traffic API（近 14 天，仅 owner 可见）。更新数据：在本目录运行
+    <code>python collect.py</code> 后刷新本页。
+  </div>
+
+  <div id="alertSlot"></div>
+
+  <div class="kpis" id="kpis"></div>
+
+  <div class="card" style="margin-bottom:24px;">
+    <h3>Star 与 克隆</h3>
+    <div id="scLegend" class="legend"></div>
+    <div id="scChart" style="padding-top:2px;"></div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <h3 id="refTitle">流量来源</h3>
+      <div id="refChart" class="bar-chart"></div>
+    </div>
+    <div class="card">
+      <h3>长期趋势</h3>
+      <div class="legend">
+        <span><i class="dot" style="background:var(--accent)"></i> 总克隆/14d</span>
+        <span><i class="dot" style="background:var(--bar)"></i> 总 Star</span>
+      </div>
+      <div id="trendNote" style="color:var(--muted);font-size:12px;margin:4px 0 10px;"></div>
+      <div id="trendChart"></div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:20px;">
+    <h3>仓库明细</h3>
+    <table>
+      <thead>
+        <tr><th>#</th><th>仓库</th><th>可见</th><th>语言</th><th>Star</th><th>Fork</th><th>浏览/14d</th><th>克隆/14d</th><th>独特克隆</th></tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+
+  <footer>
+    WORKBUDDY · 数据自包含 · STAR 认可度 · 克隆 使用意图 · 浏览 曝光 · 来源 流量入口
+  </footer>
+</div>
+
+<script>
+function svgLine(points, color, gridColor, textColor){
+  if(!points || !points.length) return '';
+  const w=680, padL=46, padR=16, padT=14, padB=22, h=150;
+  const innerW=w-padL-padR, innerH=h-padT-padB;
+  const maxV=Math.max(1, ...points.map(p=>p.v));
+  const x=i=> padL + (points.length===1 ? innerW/2 : innerW*i/(points.length-1));
+  const y=v=> padT + innerH*(1 - v/maxV);
+  let grid='';
+  for(let t=0; t<=1.0001; t+=0.25){
+    const gy=(padT+innerH*t).toFixed(1);
+    grid+=`<line x1="${padL}" y1="${gy}" x2="${w-padR}" y2="${gy}" stroke="${gridColor}" stroke-width="1"/>`;
+    grid+=`<text x="${padL-6}" y="${(parseFloat(gy)+3).toFixed(1)}" fill="${textColor}" font-size="9" text-anchor="end">${Math.round(maxV*(1-t))}</text>`;
+  }
+  const coords=points.map((p,i)=>`${x(i).toFixed(1)},${y(p.v).toFixed(1)}`).join(' ');
+  const dots=points.map((p,i)=>`<circle cx="${x(i).toFixed(1)}" cy="${y(p.v).toFixed(1)}" r="3" fill="${color}"/>`).join('');
+  const vlabels=points.map((p,i)=>`<text x="${x(i).toFixed(1)}" y="${(y(p.v)-6).toFixed(1)}" fill="${color}" font-size="9" text-anchor="middle">${p.v}</text>`).join('');
+  const xlabels=points.map((p,i)=>`<text x="${x(i).toFixed(1)}" y="${(h-6)}" fill="${textColor}" font-size="9" text-anchor="middle">${p.label}</text>`).join('');
+  return `<svg viewBox="0 0 ${w} ${h}" width="100%" style="margin-bottom:12px;" role="img">${grid}<polyline points="${coords}" fill="none" stroke="${color}" stroke-width="2"/>${dots}${vlabels}${xlabels}</svg>`;
+}
+
+const D = window.DASHBOARD_DATA;
+if (!D || !(D.repos || []).length) {
+  document.getElementById('alertSlot').innerHTML =
+    '<div class="alert">未检测到数据。请在该目录运行 python collect.py 生成后刷新本页。</div>';
+} else {
+  const repos = (D.repos || []).slice().sort((a,b)=>(b.clones||0)-(a.clones||0));
+  document.getElementById('gen').textContent = (D.owner) + ' · ' + D.generatedAt.replace('T',' ').replace('Z',' UTC');
+
+  const totalStars = repos.reduce((s,r)=>s+(r.stars||0),0);
+  const totalClones = repos.reduce((s,r)=>s+(r.clones||0),0);
+  const totalViews = repos.reduce((s,r)=>s+(r.views||0),0);
+  const publicCount = repos.filter(r=>!r.private).length;
+
+  document.getElementById('kpis').innerHTML = [
+    {label:'总 Star', num:totalStars, sub2:'全部仓库累计'},
+    {label:'近 14 天克隆', num:totalClones, sub2:'最强使用信号'},
+    {label:'近 14 天浏览', num:totalViews, sub2:'曝光量'},
+    {label:'公开仓库', num:publicCount, sub2:'共 '+repos.length+' 个'},
+  ].map(k=>
+    `<div class="kpi"><div class="label">${k.label}</div><div class="num">${k.num}</div><div class="sub2">${k.sub2}</div></div>`
+  ).join('');
+
+  // --- Star vs Clone (star=neutral, clone=accent) ---
+  document.getElementById('scLegend').innerHTML =
+    '<span><i class="dot" style="background:var(--bar)"></i> Star</span>'+
+    '<span><i class="dot" style="background:var(--accent)"></i> 克隆/14d</span>';
+
+  const maxSC = Math.max(1, ...repos.map(r=>Math.max(r.stars||0,r.clones||0)));
+  document.getElementById('scChart').innerHTML = repos.map(r=>{
+    const s=r.stars||0, c=r.clones||0,
+          sp=(s/maxSC*100).toFixed(1), cp=(c/maxSC*100).toFixed(1);
+    return `<div class="group-bar">`+
+      `<span class="group-label" title="${r.name}">${r.name}</span>`+
+      `<div class="group-tracks">`+
+        `<div class="g-track"><div class="g-fill" style="width:${sp}%;background:var(--bar);" title="Star ${s}"></div></div>`+
+        `<div class="g-track"><div class="g-fill" style="width:${cp}%;background:var(--accent);" title="克隆 ${c}"></div></div>`+
+      `</div>`+
+      `<span class="g-val">${s}</span><span class="g-val">${c}</span></div>`;
+  }).join('');
+
+  // --- Referrers (neutral) ---
+  const topRef = repos.slice().sort((a,b)=>(b.referrers||[]).length-(a.referrers||[]).length)[0];
+  const refData = (topRef && topRef.referrers) ? topRef.referrers : [];
+  document.getElementById('refTitle').textContent = '流量来源 — ' + (topRef?topRef.name:'无数据');
+  if (refData.length) {
+    const maxRef = Math.max(1, ...refData.map(r=>r.count));
+    document.getElementById('refChart').innerHTML = refData.map(r=>{
+      const v=r.count, pct=(v/maxRef*100).toFixed(1);
+      return `<div class="bar-row"><span class="bar-label">${r.referrer}</span>`+
+        `<div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:var(--bar);">${v>15?v:''}</div></div>`+
+        `<span class="bar-val">${v}<span style="color:var(--faint)"> / ${r.uniques}u</span></span></div>`;
+    }).join('');
+  } else {
+    document.getElementById('refChart').innerHTML = '<p style="color:var(--muted);font-size:13px;margin:0;">暂无来源数据</p>';
+  }
+
+  // --- Trend ---
+  const hist = window.DASHBOARD_HISTORY || [];
+  const trendEl = document.getElementById('trendChart');
+  const trendNote = document.getElementById('trendNote');
+  if (!hist.length) {
+    trendNote.textContent = '暂无历史数据，运行 collect.py 后开始累积。';
+  } else {
+    const clonesPts = hist.map(h=>({label:h.date.slice(5), v:h.totals.clones}));
+    const starsPts = hist.map(h=>({label:h.date.slice(5), v:h.totals.stars}));
+    if (hist.length < 2) {
+      trendNote.textContent = '今日为首个快照。明日自动存档后会出现第二条线，趋势随之成形。';
+    } else {
+      trendNote.textContent = '已累积 ' + hist.length + ' 天快照（' + hist[0].date + ' ~ ' + hist[hist.length-1].date + '）';
+    }
+    trendEl.innerHTML = svgLine(clonesPts, '#C2A878', '#262629', '#8E8B84') +
+                        svgLine(starsPts, '#3a3a3c', '#262629', '#8E8B84');
+  }
+
+  // --- Table ---
+  document.getElementById('tbody').innerHTML = repos.map((r,i)=>
+    `<tr>
+      <td class="rank">${i+1}</td>
+      <td><a href="${r.url}" target="_blank" rel="noopener">${r.name}</a></td>
+      <td><span class="badge ${r.private?'priv':''}">${r.private?'私有':'公开'}</span></td>
+      <td>${r.language||'—'}</td>
+      <td class="num-cell">${r.stars||0}</td>
+      <td class="num-cell">${r.forks||0}</td>
+      <td class="num-cell">${r.views??'—'}</td>
+      <td class="num-cell">${r.clones??'—'}</td>
+      <td class="num-cell">${r.cloneUniques??'—'}</td>
+    </tr>`
+  ).join('');
+}
+</script>
+</body>
+</html>
