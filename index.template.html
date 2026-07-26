@@ -6,6 +6,7 @@
 <title>GitHub 项目热度</title>
 <script>/*__DASHBOARD_DATA__*/</script>
 <script>/*__DASHBOARD_HISTORY__*/</script>
+<script>/*__STAR_HISTORY__*/</script>
 <style>
   :root{
     --bg:#0e0e10;
@@ -135,6 +136,15 @@
     </div>
   </div>
 
+  <div class="card" style="margin-bottom:24px;">
+    <h3>Star 历史（账号累计）</h3>
+    <div class="legend">
+      <span><i class="dot" style="background:var(--accent)"></i> 累计 Star</span>
+    </div>
+    <div id="starHistNote" style="color:var(--muted);font-size:12px;margin:4px 0 10px;"></div>
+    <div id="starHistChart"></div>
+  </div>
+
   <div class="card" style="margin-bottom:20px;">
     <h3>仓库明细</h3>
     <table>
@@ -243,6 +253,20 @@ if (!D || !(D.repos || []).length) {
     }
     trendEl.innerHTML = svgLine(clonesPts, '#C2A878', '#262629', '#8E8B84') +
                         svgLine(starsPts, '#3a3a3c', '#262629', '#8E8B84');
+  }
+
+  // --- Star history (account cumulative) ---
+  const sh = window.STAR_HISTORY || {total:[], repos:{}};
+  const shEl = document.getElementById('starHistChart');
+  const shNote = document.getElementById('starHistNote');
+  const totalPts = (sh.total || []).slice().sort((a,b)=> a.date < b.date ? -1 : 1);
+  if (!totalPts.length) {
+    shNote.textContent = '暂无 Star 历史（公开仓库尚未获得 Star，或抓取受限）。';
+  } else {
+    shNote.textContent = '来源 GitHub Stargazers API · starred_at（覆盖仓库整个生命周期，非 14 天窗口）· '
+      + totalPts[0].date + ' ~ ' + totalPts[totalPts.length-1].date;
+    const pts = totalPts.map(p=>({label:p.date.slice(5), v:p.cumulative}));
+    shEl.innerHTML = svgLine(pts, '#C2A878', '#262629', '#8E8B84');
   }
 
   // --- Table ---
