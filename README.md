@@ -6,6 +6,7 @@
 [![Last Commit](https://img.shields.io/github/last-commit/truman-t3/github-heat-dashboard?style=flat)](https://github.com/truman-t3/github-heat-dashboard/commits/master)
 [![Language](https://img.shields.io/github/languages/top/truman-t3/github-heat-dashboard?style=flat)](collect.py)
 [![Traffic](https://img.shields.io/badge/Traffic%20API-included-C2A878?style=flat)](https://docs.github.com/en/rest/metrics/traffic)
+[![Star History](https://api.star-history.com/svg?repos=truman-t3/github-heat-dashboard&type=Date)](https://www.star-history.com/#truman-t3/github-heat-dashboard&type=Date)
 
 > English doc below · [中文文档](#中文文档)
 
@@ -87,6 +88,12 @@ github-heat-dashboard/
 | Clone | **The strongest "actually using it" signal** |
 | View | Exposure (14-day window) |
 | Referrer | Where the traffic comes from (who is sending people) |
+
+### ⭐ Star this project
+
+If this dashboard helped you see your GitHub reach at a glance, a star is the easiest way to say thanks — and it helps other developers find it. Click the ★ at the top-right of the repo.
+
+[![Star History Chart](https://api.star-history.com/svg?repos=truman-t3/github-heat-dashboard&type=Date)](https://www.star-history.com/#truman-t3/github-heat-dashboard&type=Date)
 
 ### License
 
@@ -170,6 +177,10 @@ github-heat-dashboard/
 | 克隆 | **最强「真要用」信号** |
 | 浏览 | 曝光量（14 天窗口） |
 | 来源 | 流量从哪来（谁在带量） |
+
+### ⭐ 给个项目点个 Star
+
+如果这个看板帮你看清了自己在 GitHub 上的影响力，点个 Star 就是最简单的鼓励，也能帮更多开发者发现它。点击仓库右上角的 ★ 即可。
 
 ### License
 

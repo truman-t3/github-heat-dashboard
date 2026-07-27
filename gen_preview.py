@@ -30,6 +30,7 @@ S = grab("STAR_HISTORY")
 repos = [r for r in D["repos"] if not r.get("private")]
 repos.sort(key=lambda r: -(r.get("clones") or 0))
 totalStars = sum((r.get("stars") or 0) for r in D["repos"])
+totalForks = sum((r.get("forks") or 0) for r in D["repos"])
 totalClones = sum((r.get("clones") or 0) for r in D["repos"])
 histDays = len(Hhist)
 starPts = len(S.get("total", []))
@@ -44,24 +45,8 @@ d.text((62, 212), "零依赖 · 本地优先 · 含 Star / Fork / 克隆 / 浏�
        font=font(26), fill=muted)
 d.rectangle([64, 286, 67, 304], fill=accent)
 
-# 真实克隆排行（Top 5 公开仓库）
-top = repos[:5]
-bx, by, bw, bgap, bh_max = 64, 330, 150, 30, 150
-maxc = max(1, *[r.get("clones") or 0 for r in top])
-for i, r in enumerate(top):
-    v = r.get("clones") or 0
-    h = int(bh_max * (v / maxc))
-    x = bx + i * (bw + bgap)
-    col = accent if i == 0 else bar
-    d.rectangle([x, by + bh_max - h, x + bw, by + bh_max], fill=col)
-    nm = r["name"]
-    if len(nm) > 12:
-        nm = nm[:11] + "…"
-    d.text((x + bw // 2, by + bh_max + 18), str(v), font=font(16), fill=muted, anchor="mm")
-    d.text((x + bw // 2, by + bh_max + 42), nm, font=font(18), fill=text, anchor="mm")
-
-# footer summary（真实指标）
-summary = f"\u2605 {totalStars}   \u2b07 {totalClones} \u514b\u9686/14d   \u00b7  {histDays} \u5929\u8d8b\u52bf   \u00b7  {starPts} \u4e2a Star \u5386\u53f2\u70b9"
+# footer summary（仅公开指标 Star / Fork，不暴露 owner-only 流量）
+summary = f"\u2605 {totalStars} Stars    \ud83c\udf74 {totalForks} Forks    \u00b7  \u96f6\u4f9d\u8d56\u672c\u5730\u770b\u677f"
 d.text((64, 560), summary, font=font(22), fill=muted)
 
 img.save("preview.png")
